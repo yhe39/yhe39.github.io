@@ -85,7 +85,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <script>
     var data = "hello";
     var connection = null;
-    var presUrl = "https://github.com/Honry/demo/tree/gh-pages/tests/display.html";
+    var presUrl = "display.html";
     var request;
 
     var btnStart = document.getElementById("btnStart");
@@ -97,9 +97,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     var txtMsg = document.getElementById("log");
     
     window.onload = function() {
+      console.log('onload...');
       init();
       request = new PresentationRequest(presUrl);
       request.getAvailability().then(function(availability) {
+        console.log('get availablity ok...');
+        console.log(availability.value);
         updateAvailabilityStatus(availability.value);
         availability.onchange = function() {
           updateAvailabilityStatus(this.value);
@@ -110,6 +113,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     };
 
     function init() {
+      console.log('init...');
       btnStart.disabled = true;
       btnClose.disabled = true;
       btnTerminate.disabled = true;
