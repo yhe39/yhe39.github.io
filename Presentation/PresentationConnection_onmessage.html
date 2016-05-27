@@ -27,51 +27,33 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
 <meta charset="utf-8">
-<title>PresentationRequest.start()</title>
+<title>PresentationConnection.onmessage</title>
 <link rel="author" title="Intel" href="http://www.intel.com">
 <link rel="author" title="Chunyan Wang" href="mailto:chunyanx.wang@intel.com">
-<link rel="help" href="http://w3c.github.io/presentation-api/#starting-a-presentation">
+<link rel="help" href="http://w3c.github.io/presentation-api/#interface-presentationconnection">
+<script src="../resources/testharness.js"></script>
+<script src="../resources/testharnessreport.js"></script>
 <div id="log"></div>
-<div class="content">
-  <h2>Test Steps:</h2>
-  <ol>
-    <li>Click the "start" button</li>
-    <li>Click the "close" button</li>
-  </ol>
-  <h2>Expected Result:</h2>
-  <ol>
-    <li>Info "start success" was displayed</li>
-    <li>Info "close success" was displayed</li>
-  </ol>
-  <div align="middle">
-    <input type='button' value='start' onclick="onclickStart()" />
-  </div>
-  <div align="middle">
-    <input type='button' value='close' onclick="onclickClose()" />
-  </div>
-  <div id="result" style="width:100%; height:100px; word-wrap: break-word; word-break: normal;"></div>
-</div>
-<script type='text/javascript'>
-  var connection = null;
+<script>
+async_test(function(t) {
   var url = "display/presentation.html";
-  function onclickStart() {
-    var request = new PresentationRequest(url);
-    request.start().then(function(conn) {
-      connection = conn;
-      document.getElementById("result").innerHTML = "start success" + "<br/>"; 
-      }).catch(function(e) {
-        document.getElementById("result").innerHTML = "start failed " + e.name + "<br/>";
+  var request = new PresentationRequest(url);
+  request.start()
+    .then(function(connection) {
+      assert_true(connection instanceof PresentationConnection);
+      connection.onconnected = t.step_func(function() {
+        assert_equals(this.state, "connected");
+        this.onmessage = t.step_func_done(function(evt) {
+          assert_equals(evt.type, "message", "evt.type");
+          assert_false(evt.bubbles, "evt.bubbles");
+          assert_false(evt.cancelable, "evt.cancelable");
+        });
+        this.send("ping");
+      });
+    })
+    .catch(function(ex) {
+      assert_unreached(ex.name + ":" + ex.message);
     });
-  }
-  function onclickClose() {
-    if(connection != null) {
-      connection.close();
-      document.getElementById("result").innerHTML += "close success";
-    } else {
-      document.getElementById("result").innerHTML += "the connection is null";
-    }
-  }
+}, "Check that onmessage event is fired when user agent receive message through a PresentationConnection.");
 </script>
-<div class="footer">
-  <div id="footer"></div>
-</div>
+
